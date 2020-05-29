@@ -3,13 +3,7 @@ from mycroft.skills.core import FallbackSkill, intent_file_handler, \
     intent_handler
 from adapt.intent import IntentBuilder
 import time
-
-
-def camel_case_split(identifier):
-    """Split camel case string"""
-    regex = '.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)'
-    matches = re.finditer(regex, identifier)
-    return ' '.join([m.group(0) for m in matches])
+from mycroft.util import camel_case_split, create_daemon
 
 
 class MySkill(FallbackSkill):
