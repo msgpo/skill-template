@@ -1,0 +1,41 @@
+{
+    "name": "Skill TEMPLATE",
+    "skillMetadata": {
+        "sections": [
+            {
+                "name": "timeout",
+                "fields": [
+                    {
+                        "name": "timeout",
+                        "type": "number",
+                        "label":"timeout",
+                        "value": "15"
+                    }
+                ]
+            },
+            {
+                "name": "intercept",
+                "fields": [
+                    {
+                        "name": "intercept",
+                        "type": "text",
+                        "label": "true or false",
+                        "value": "false"
+                    }
+                ]
+            },
+
+            {
+                "name": "priority",
+                "fields": [
+                    {
+                        "name": "priority",
+                        "type": "number",
+                        "label":"priority",
+                        "value": "50"
+                    }
+                ]
+            }
+        ]
+    }
+}
