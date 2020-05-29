@@ -16,8 +16,8 @@ class MySkill(FallbackSkill):
     def __init__(self):
         super(MySkill, self).__init__(name='MySkill')
         # skill settings defaults
-        if "intercept" not in self.settings:
-            self.settings["intercept"] = False
+        if "intercept_allowed" not in self.settings:
+            self.settings["intercept_allowed"] = False
         if "priority" not in self.settings:
             self.settings["priority"] = 50
         if "timeout" not in self.settings:
@@ -47,8 +47,7 @@ class MySkill(FallbackSkill):
         self.add_event(self.namespace + ".converse.deactivate",
                        self.handle_converse_disable)
 
-        if self.settings["intercept"]:
-            self.converse_thread = create_daemon(self.converse_keepalive)
+        self.converse_thread = create_daemon(self.converse_keepalive)
 
         self.initial_setup()
 
@@ -100,9 +99,7 @@ class MySkill(FallbackSkill):
 
     # event handlers
     def handle_new_setting(self, key, value, old_value):
-        if key == "intercept" and str(value).lower() == "true":
-            self.stop_converse()
-            self.converse_thread = create_daemon(self.converse_keepalive)
+        pass
 
     def handle_success(self, message):
         self.waiting = False
@@ -138,7 +135,7 @@ class MySkill(FallbackSkill):
             time.sleep(60)
 
     def converse(self, utterances, lang="en-us"):
-        if self.conversing:
+        if self.conversing and self.settings["intercept_allowed"]:
             return self.handle_utterance(utterances[0])
         return False
 

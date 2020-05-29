@@ -14,10 +14,10 @@
                 ]
             },
             {
-                "name": "intercept",
+                "name": "intercept_allowed",
                 "fields": [
                     {
-                        "name": "intercept",
+                        "name": "intercept_allowed",
                         "type": "text",
                         "label": "true or false",
                         "value": "false"
