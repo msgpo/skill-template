@@ -24,9 +24,8 @@ class MySkill(FallbackSkill):
             self.settings["timeout"] = 15
 
         # state trackers
-        self.converse_thread = None
+        self._converse_keepalive = None
         self.waiting = False
-        self.conversing = False
         self.success = False
         self._old_settings = dict(self.settings)
 
@@ -47,7 +46,7 @@ class MySkill(FallbackSkill):
         self.add_event(self.namespace + ".converse.deactivate",
                        self.handle_converse_disable)
 
-        self.converse_thread = create_daemon(self.converse_keepalive)
+        self._converse_keepalive = create_daemon(self.converse_keepalive)
 
         self.initial_setup()
 
@@ -73,23 +72,23 @@ class MySkill(FallbackSkill):
 
     @intent_file_handler("converse.enable.intent")
     def handle_converse_enable(self, message):
-        if self.conversing:
+        if self.settings["intercept_allowed"]:
             self.speak_dialog("converse_on",
                           {"skill_name": self.skill_name})
         else:
             self.speak_dialog("converse_enable",
                           {"skill_name": self.skill_name})
-            self.conversing = True
+        self.settings["intercept_allowed"] = True
 
     @intent_file_handler("converse.disable.intent")
     def handle_converse_disable(self, message):
-        if not self.conversing:
+        if not self.settings["intercept_allowed"]:
             self.speak_dialog("converse_off",
                           {"skill_name": self.skill_name})
         else:
             self.speak_dialog("converse_disable",
                           {"skill_name": self.skill_name})
-            self.conversing = False
+        self.settings["intercept_allowed"] = False
 
     @intent_handler(IntentBuilder("WhyIntent")
                          .require("WhyKeyword").require("CHANGED"))
@@ -129,13 +128,13 @@ class MySkill(FallbackSkill):
     # converse
     def converse_keepalive(self):
         while True:
-            if self.conversing:
+            if self.settings["intercept_allowed"]:
                 # avoid converse timed_out
                 self.make_active()
             time.sleep(60)
 
     def converse(self, utterances, lang="en-us"):
-        if self.conversing and self.settings["intercept_allowed"]:
+        if self.settings["intercept_allowed"]:
             return self.handle_utterance(utterances[0])
         return False
 
@@ -146,8 +145,8 @@ class MySkill(FallbackSkill):
 
     # shutdown
     def stop_converse(self):
-        if self.converse_thread is not None and self.converse_thread.running:
-            self.converse_thread.join(2)
+        if self._converse_keepalive is not None and self._converse_keepalive.running:
+            self._converse_keepalive.join(2)
 
     def shutdown(self):
         self.stop_converse()
