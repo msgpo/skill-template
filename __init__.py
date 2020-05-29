@@ -62,8 +62,7 @@ class MySkill(FallbackSkill):
 
     def get_intro_message(self):
         # welcome dialog on skill install
-        self.speak_dialog("intro",
-                          {"skill_name": self.skill_name})
+        self.speak_dialog("intro", {"skill_name": self.skill_name})
 
     # intents
     def handle_utterance(self, utterance):
@@ -74,31 +73,34 @@ class MySkill(FallbackSkill):
     def handle_converse_enable(self, message):
         if self.settings["intercept_allowed"]:
             self.speak_dialog("converse_on",
-                          {"skill_name": self.skill_name})
+                              {"skill_name": self.skill_name})
         else:
             self.speak_dialog("converse_enable",
-                          {"skill_name": self.skill_name})
+                              {"skill_name": self.skill_name})
         self.settings["intercept_allowed"] = True
+        self.log.debug("Utterance intercept allowed for " + self.skill_name)
 
     @intent_file_handler("converse.disable.intent")
     def handle_converse_disable(self, message):
         if not self.settings["intercept_allowed"]:
             self.speak_dialog("converse_off",
-                          {"skill_name": self.skill_name})
+                              {"skill_name": self.skill_name})
         else:
             self.speak_dialog("converse_disable",
-                          {"skill_name": self.skill_name})
+                              {"skill_name": self.skill_name})
         self.settings["intercept_allowed"] = False
+        self.log.debug("Utterance intercept NOT allowed for " + self.skill_name)
 
     @intent_handler(IntentBuilder("WhyIntent")
-                         .require("WhyKeyword").require("CHANGED"))
+                    .require("WhyKeyword").require("CHANGED"))
     def handle_explain_why(self, message):
         # set context elsewhere to enable this
         self.speak_dialog("why", wait=True)
 
     # event handlers
     def handle_new_setting(self, key, value, old_value):
-        pass
+        self.log.debug("{name}: {key} changed from {value} to {old}".format(
+            key=key, value=value, old=old_value, name=self.skill_name))
 
     def handle_success(self, message):
         self.waiting = False
@@ -109,6 +111,7 @@ class MySkill(FallbackSkill):
         self.success = False
 
     def wait_for_something(self):
+        self.log.debug("{name}: waiting".format(name=self.skill_name))
         start = time.time()
         self.success = False
         self.waiting = True
@@ -123,6 +126,7 @@ class MySkill(FallbackSkill):
                 message.reply(self.namespace + ".timeout")
             self.bus.emit(message)
             self.waiting = False
+        self.log.debug("{name}: wait ended".format(name=self.skill_name))
         return self.success
 
     # converse
@@ -135,12 +139,15 @@ class MySkill(FallbackSkill):
 
     def converse(self, utterances, lang="en-us"):
         if self.settings["intercept_allowed"]:
+            self.log.debug("{name}: Intercept stage".format(
+                name=self.skill_name))
             return self.handle_utterance(utterances[0])
         return False
 
     # fallback
     def handle_fallback(self, message):
         utterance = message.data["utterance"]
+        self.log.debug("{name}: Fallback stage".format(name=self.skill_name))
         return self.handle_utterance(utterance)
 
     # shutdown
