@@ -68,6 +68,10 @@ class MySkill(FallbackSkill):
                           {"skill_name": self.skill_name})
 
     # intents
+    def handle_utterance(self, utterance):
+        # handle both fallback and converse stage utterances
+        return False
+
     @intent_file_handler("converse.enable.intent")
     def handle_converse_enable(self, message):
         if self.conversing:
@@ -135,16 +139,13 @@ class MySkill(FallbackSkill):
 
     def converse(self, utterances, lang="en-us"):
         if self.conversing:
-            message = dig_for_message()
-            if not message:
-                message = Message("recognizer_loop:utterance",
-                                  {"utterances": utterances[0]})
-
+            return self.handle_utterance(utterances[0])
         return False
 
     # fallback
     def handle_fallback(self, message):
-        return False
+        utterance = message.data["utterance"]
+        return self.handle_utterance(utterance)
 
     # shutdown
     def stop_converse(self):
