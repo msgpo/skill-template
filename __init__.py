@@ -3,6 +3,7 @@ from mycroft.skills.core import FallbackSkill, intent_file_handler, \
     intent_handler
 from adapt.intent import IntentBuilder
 import time
+import random
 from mycroft.util import camel_case_split, create_daemon
 
 
@@ -43,6 +44,21 @@ class MySkill(FallbackSkill):
         self._converse_keepalive = create_daemon(self.converse_keepalive)
 
         self.initial_setup()
+        self.add_event('skill-XXX.jarbasskills.home',
+                       self.homepage)
+
+    def homepage(self):
+        self.gui.clear()
+        if random.choice([True, False]):
+            self.gui.show_image(join(dirname(__file__), "ui", "images",
+                                     "pixel_jarbas.png"),
+                                caption="A skill by Jarbas AI",
+                                fill='PreserveAspectFit')
+        else:
+            self.gui.show_image(join(dirname(__file__), "ui", "images",
+                                     "jurassic_jarbas.png"),
+                                caption="A skill by Jarbas AI",
+                                fill='PreserveAspectFit')
 
     def _on_web_settings_change(self):
         for k in self.settings:
